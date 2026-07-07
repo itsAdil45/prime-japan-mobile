@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
 
 const HOME_PATH = "/home";
+const TAB_ROOTS = ["/home", "/search", "/watchlist", "/orders", "/account"];
 
 export default function BackToHomeGuard() {
   const pathname = usePathname();
@@ -17,11 +18,19 @@ export default function BackToHomeGuard() {
 
   useEffect(() => {
     const listenerPromise = App.addListener("backButton", () => {
-      if (pathnameRef.current !== HOME_PATH) {
-        router.replace(HOME_PATH);
+      const current = pathnameRef.current;
+      const isTabRoot = TAB_ROOTS.includes(current);
+
+      if (!isTabRoot) {
+        // Nested/detail screen — pop one level within the current tab's stack
+        router.back();
+        return;
+      }
+
+      if (current === HOME_PATH) {
+        App.exitApp(); // already at Home — nothing left to go back to
       } else {
-        // Already on Home — hardware back should actually exit here
-        App.exitApp();
+        router.replace(HOME_PATH); // on another tab's root — jump to Home
       }
     });
 

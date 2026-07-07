@@ -13,6 +13,7 @@ import {
   Clock,
   Gauge,
 } from "lucide-react";
+import Link from "next/link";
 
 const FontImports = () => (
   <style>{`
@@ -91,10 +92,13 @@ function SectionHeader({ title }) {
       <h2 className="font-display text-base font-semibold text-zinc-900">
         {title}
       </h2>
-      <button className="font-ui flex items-center gap-0.5 text-xs font-medium text-zinc-400">
-        See all
+      <Link
+        href="/detail"
+        className="font-ui flex items-center gap-0.5 text-xs font-medium text-zinc-400"
+      >
+        See more
         <ChevronRight className="h-3.5 w-3.5" />
-      </button>
+      </Link>
     </div>
   );
 }
