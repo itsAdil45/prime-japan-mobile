@@ -1,8 +1,8 @@
-// components/BackToHomeGuard.jsx
 "use client";
 
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { App } from "@capacitor/app";
 
 const HOME_PATH = "/home";
 
@@ -16,17 +16,18 @@ export default function BackToHomeGuard() {
   }, [pathname]);
 
   useEffect(() => {
-    window.history.pushState({ tabTrap: true }, "", window.location.href);
-
-    function handlePopState() {
+    const listenerPromise = App.addListener("backButton", () => {
       if (pathnameRef.current !== HOME_PATH) {
         router.replace(HOME_PATH);
-        window.history.pushState({ tabTrap: true }, "", HOME_PATH);
+      } else {
+        // Already on Home — hardware back should actually exit here
+        App.exitApp();
       }
-    }
+    });
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+    return () => {
+      listenerPromise.then((listener) => listener.remove());
+    };
   }, [router]);
 
   return null;
