@@ -73,7 +73,7 @@ function CategoryRow({ active, onChange }) {
             key={c}
             onClick={() => onChange(c)}
             className={`font-ui shrink-0 rounded-full px-4 py-2 text-xs font-medium transition ${
-              isActive ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500"
+              isActive ? "bg-[#02ab86] text-white" : "bg-zinc-100 text-zinc-500"
             }`}
           >
             {c}
@@ -160,7 +160,7 @@ function FeaturedAuctionCard() {
               ¥2,840,000
             </p>
           </div>
-          <button className="font-ui rounded-lg bg-orange-600 px-3.5 py-2 text-xs font-semibold text-white">
+          <button className="font-ui rounded-lg bg-black px-3.5 py-2 text-xs font-semibold text-white">
             Place bid
           </button>
         </div>

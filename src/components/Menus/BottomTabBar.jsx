@@ -31,17 +31,17 @@ export default function BottomTabBar() {
           >
             <span className="relative">
               <Icon
-                className={`h-5 w-5 ${isActive ? "text-orange-600" : "text-zinc-400"}`}
+                className={`h-5 w-5 ${isActive ? "text-[#02ab86]" : "text-zinc-400"}`}
                 strokeWidth={isActive ? 2.25 : 2}
               />
               {isActive && (
-                <span className="absolute -bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-orange-600" />
+                <span className="absolute -bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#02ab86]" />
               )}
             </span>
             <span
               className={`text-[10px] ${
                 isActive
-                  ? "font-semibold text-orange-600"
+                  ? "font-semibold text-[#02ab86]"
                   : "font-medium text-zinc-400"
               }`}
             >
