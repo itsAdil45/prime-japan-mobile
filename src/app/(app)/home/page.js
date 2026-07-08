@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import {
-  Home as HomeIcon,
   Search,
   Heart,
-  Package,
-  User,
   Bell,
   ChevronRight,
   Car,
@@ -23,14 +20,6 @@ const FontImports = () => (
   `}</style>
 );
 
-const TABS = [
-  { key: "home", label: "Home", icon: HomeIcon },
-  { key: "search", label: "Search", icon: Search },
-  { key: "watchlist", label: "Watchlist", icon: Heart },
-  { key: "orders", label: "Orders", icon: Package },
-  { key: "account", label: "Account", icon: User },
-];
-
 function TopBar() {
   return (
     <div className="flex items-center justify-between px-5 pt-6">
@@ -46,8 +35,6 @@ function TopBar() {
   );
 }
 
-/* ---------- Search bar ---------- */
-
 function SearchBar() {
   return (
     <button className="font-ui mx-5 mt-5 flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-left shadow-sm">
@@ -58,8 +45,6 @@ function SearchBar() {
     </button>
   );
 }
-
-/* ---------- Category chips ---------- */
 
 const CATEGORIES = ["All", "Sedan", "SUV", "Truck", "Van", "Sports", "Hybrid"];
 
@@ -83,8 +68,6 @@ function CategoryRow({ active, onChange }) {
     </div>
   );
 }
-
-/* ---------- Section header ---------- */
 
 function SectionHeader({ title }) {
   return (
@@ -169,8 +152,6 @@ function FeaturedAuctionCard() {
   );
 }
 
-/* ---------- Compact vehicle card (horizontal scroll) ---------- */
-
 function VehicleCardCompact() {
   return (
     <div className="w-36 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-white">
@@ -218,11 +199,8 @@ function VehicleCardGrid() {
   );
 }
 
-/* ---------- Root ---------- */
-
 export default function HomeScreen() {
   const [category, setCategory] = useState("All");
-  const [tab, setTab] = useState("home");
 
   return (
     <div className="relative flex min-h-screen flex-col bg-zinc-50 font-sans">

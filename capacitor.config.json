@@ -5,5 +5,10 @@
   "server": {
     "url": "https://prime-japan-mobile.vercel.app",
     "cleartext": false
+  },
+  "plugins": {
+    "StatusBar": {
+      "overlaysWebView": false
+    }
   }
 }

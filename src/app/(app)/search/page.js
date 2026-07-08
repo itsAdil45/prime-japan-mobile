@@ -1,41 +1,8 @@
 "use client";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import {
-  ChevronLeft,
-  SlidersHorizontal,
-  Search,
-  X,
-  Heart,
-  Clock,
-  ArrowUpDown,
-  Gauge,
-  Fuel,
-  Car,
-} from "lucide-react";
-
-/* ------------------------------------------------------------------ */
-/*  This file mirrors CarsShopComponent / AuctionSidebarFilters /      */
-/*  AuctionGrid / AuctionCard from the web app, redesigned for a       */
-/*  single-column mobile webview rather than a sidebar layout:         */
-/*                                                                      */
-/*  Web              →  Mobile                                         */
-/*  Sidebar filters  →  Bottom sheet opened by a filter button          */
-/*  MUI dual sliders →  Custom native dual <input type="range">        */
-/*  Pagination links →  Infinite scroll (IntersectionObserver sentinel) */
-/*  Horizontal cards →  Compact vertical cards, 1-column                */
-/*                                                                      */
-/*  No API calls here — filtering, chips, and scroll-pagination all     */
-/*  run against generated mock data so the interaction logic can be     */
-/*  reviewed before wiring to /vehicles and /vehicles/filters.           */
-/*                                                                      */
-/*  Split points for the real project:                                  */
-/*    components/shop/FilterSheet.jsx                                   */
-/*    components/shop/DualRangeSlider.jsx                                */
-/*    components/shop/VehicleCard.jsx                                   */
-/*    components/shop/FilterChips.jsx                                   */
-/*    components/shop/ShopTopBar.jsx                                    */
-/*    This screen (app/(app)/search/page.jsx) then just composes them.  */
-/* ------------------------------------------------------------------ */
+import { SlidersHorizontal, Search, X, ArrowUpDown, Car } from "lucide-react";
+import { VehicleCard } from "@/components/Shop/VehicleCard";
+import { FilterSheetContent } from "@/components/Shop/FilterSheet";
 
 const StyleBlock = () => (
   <style>{`
@@ -80,8 +47,6 @@ const StyleBlock = () => (
     }
   `}</style>
 );
-
-/* ---------- Mock data ---------- */
 
 const MAKES = ["Toyota", "Honda", "Nissan", "Mazda", "Subaru", "Suzuki"];
 const MODELS = {
@@ -160,14 +125,10 @@ function generateVehicles(count) {
 
 const ALL_VEHICLES = generateVehicles(54);
 
-/* ---------- Formatting ---------- */
-
 const formatPrice = (jpy) => `¥${jpy.toLocaleString()}`;
 const formatMileage = (km) => `${(km / 1000).toFixed(0)}k km`;
 const formatEngine = (cc) =>
   cc >= 1000 ? `${(cc / 1000).toFixed(1)}L` : `${cc}cc`;
-
-/* ---------- Bottom sheet shell (reusable) ---------- */
 
 function BottomSheet({ open, onClose, title, children, footer }) {
   if (!open) return null;
@@ -199,249 +160,6 @@ function BottomSheet({ open, onClose, title, children, footer }) {
     </div>
   );
 }
-
-/* ---------- Dual range slider ---------- */
-
-function DualRangeSlider({
-  min,
-  max,
-  step,
-  valueMin,
-  valueMax,
-  onChange,
-  format,
-}) {
-  const handleMinChange = (e) => {
-    const next = Math.min(Number(e.target.value), valueMax - step);
-    onChange([next, valueMax]);
-  };
-  const handleMaxChange = (e) => {
-    const next = Math.max(Number(e.target.value), valueMin + step);
-    onChange([valueMin, next]);
-  };
-
-  const pctMin = ((valueMin - min) / (max - min)) * 100;
-  const pctMax = ((valueMax - min) / (max - min)) * 100;
-
-  return (
-    <div className="font-ui">
-      <div className="relative h-5">
-        <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-zinc-200" />
-        <div
-          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-zinc-900"
-          style={{ left: `${pctMin}%`, right: `${100 - pctMax}%` }}
-        />
-        <input
-          type="range"
-          className="range-input"
-          min={min}
-          max={max}
-          step={step}
-          value={valueMin}
-          onChange={handleMinChange}
-        />
-        <input
-          type="range"
-          className="range-input"
-          min={min}
-          max={max}
-          step={step}
-          value={valueMax}
-          onChange={handleMaxChange}
-        />
-      </div>
-      <div className="mt-2 flex justify-between text-xs text-zinc-500">
-        <span>{format(valueMin)}</span>
-        <span>{format(valueMax)}</span>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Single (max-only) slider ---------- */
-
-function MaxSlider({ min, max, step, value, onChange, format }) {
-  const pct = ((value - min) / (max - min)) * 100;
-  return (
-    <div className="font-ui">
-      <div className="relative h-5">
-        <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-zinc-200" />
-        <div
-          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-zinc-900"
-          style={{ left: 0, right: `${100 - pct}%` }}
-        />
-        <input
-          type="range"
-          className="range-input"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-        />
-      </div>
-      <div className="mt-2 flex justify-between text-xs text-zinc-500">
-        <span>{format(min)}</span>
-        <span className="font-medium text-zinc-900">{format(value)}</span>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Filter field primitives ---------- */
-
-function FilterLabel({ children }) {
-  return (
-    <p className="font-ui mb-2 text-xs font-medium text-zinc-500">{children}</p>
-  );
-}
-
-function ChipSelect({ options, value, onChange, allLabel = "All" }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        onClick={() => onChange("")}
-        className={`font-ui rounded-full px-3.5 py-1.5 text-xs font-medium capitalize ${
-          value === "" ? "bg-[#02ab86] text-white" : "bg-zinc-100 text-zinc-500"
-        }`}
-      >
-        {allLabel}
-      </button>
-      {options.map((opt) => (
-        <button
-          key={opt}
-          onClick={() => onChange(opt)}
-          className={`font-ui rounded-full px-3.5 py-1.5 text-xs font-medium capitalize ${
-            value === opt
-              ? "bg-zinc-900 text-white"
-              : "bg-zinc-100 text-zinc-500"
-          }`}
-        >
-          {opt}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/* ---------- Filter sheet content ---------- */
-
-function FilterSheetContent({ draft, setDraft }) {
-  const patch = (updates) => setDraft((prev) => ({ ...prev, ...updates }));
-  const models = draft.make ? (MODELS[draft.make] ?? []) : [];
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <FilterLabel>Source</FilterLabel>
-        <ChipSelect
-          options={SOURCES}
-          value={draft.source}
-          onChange={(v) => patch({ source: v })}
-        />
-      </div>
-
-      <div>
-        <FilterLabel>Make</FilterLabel>
-        <ChipSelect
-          options={MAKES}
-          value={draft.make}
-          allLabel="Any make"
-          onChange={(v) => patch({ make: v, model: "" })}
-        />
-      </div>
-
-      {draft.make && (
-        <div>
-          <FilterLabel>Model</FilterLabel>
-          <ChipSelect
-            options={models}
-            value={draft.model}
-            allLabel="Any model"
-            onChange={(v) => patch({ model: v })}
-          />
-        </div>
-      )}
-
-      <div>
-        <FilterLabel>Year range</FilterLabel>
-        <div className="flex items-center gap-3">
-          <select
-            value={draft.yearMin}
-            onChange={(e) => patch({ yearMin: Number(e.target.value) })}
-            className="font-ui w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900"
-          >
-            {Array.from({ length: 22 }, (_, i) => 2005 + i).map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-          <span className="text-xs text-zinc-400">to</span>
-          <select
-            value={draft.yearMax}
-            onChange={(e) => patch({ yearMax: Number(e.target.value) })}
-            className="font-ui w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900"
-          >
-            {Array.from({ length: 22 }, (_, i) => 2005 + i).map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <FilterLabel>Price range (¥)</FilterLabel>
-        <div className="flex items-center gap-3">
-          <input
-            type="number"
-            placeholder="Min"
-            value={draft.priceMin}
-            onChange={(e) => patch({ priceMin: e.target.value })}
-            className="font-ui w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400"
-          />
-          <span className="text-xs text-zinc-400">to</span>
-          <input
-            type="number"
-            placeholder="Max"
-            value={draft.priceMax}
-            onChange={(e) => patch({ priceMax: e.target.value })}
-            className="font-ui w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400"
-          />
-        </div>
-      </div>
-
-      <div>
-        <FilterLabel>Max mileage</FilterLabel>
-        <MaxSlider
-          min={0}
-          max={1000000}
-          step={5000}
-          value={draft.mileageMax}
-          onChange={(v) => patch({ mileageMax: v })}
-          format={formatMileage}
-        />
-      </div>
-
-      <div>
-        <FilterLabel>Engine capacity</FilterLabel>
-        <DualRangeSlider
-          min={660}
-          max={10000}
-          step={50}
-          valueMin={draft.engineMin}
-          valueMax={draft.engineMax}
-          onChange={([lo, hi]) => patch({ engineMin: lo, engineMax: hi })}
-          format={formatEngine}
-        />
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Filter chips ---------- */
 
 function formatChipValue(key, value) {
   if (key === "priceMin" || key === "priceMax")
@@ -482,81 +200,6 @@ function FilterChips({ filters, onRemove, onClearAll }) {
       >
         Clear all
       </button>
-    </div>
-  );
-}
-
-/* ---------- Vehicle card ---------- */
-
-function VehicleThumb({ className = "" }) {
-  return (
-    <div
-      className={`flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 ${className}`}
-    >
-      <Car className="h-8 w-8 text-zinc-400" strokeWidth={1.5} />
-    </div>
-  );
-}
-
-function VehicleCard({ vehicle }) {
-  const [saved, setSaved] = useState(false);
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-      <div className="relative">
-        <VehicleThumb className="h-40 w-full" />
-        <div className="absolute left-2.5 top-2.5">
-          {vehicle.status === "live" ? (
-            <span className="font-ui tabular-nums inline-flex items-center gap-1 rounded-full bg-zinc-900/90 px-2 py-1 text-[10px] font-medium text-white">
-              <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-              <Clock className="h-3 w-3" /> {vehicle.countdownLabel}
-            </span>
-          ) : (
-            <span className="font-ui rounded-full bg-white/90 px-2 py-1 text-[10px] font-semibold text-zinc-600">
-              {vehicle.lotNo}
-            </span>
-          )}
-        </div>
-        <button
-          onClick={() => setSaved((s) => !s)}
-          className="absolute right-2.5 top-2.5 rounded-full bg-white/90 p-1.5"
-          aria-label={saved ? "Remove from watchlist" : "Add to watchlist"}
-        >
-          <Heart
-            className={`h-4 w-4 ${saved ? "fill-orange-600 text-orange-600" : "text-zinc-500"}`}
-          />
-        </button>
-      </div>
-
-      <div className="px-3.5 py-3">
-        <p className="font-display text-sm font-semibold text-zinc-900">
-          {vehicle.year} {vehicle.make} {vehicle.model}
-        </p>
-
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          <span className="font-ui flex items-center gap-1 rounded-md bg-zinc-50 px-2 py-1 text-[11px] text-zinc-500">
-            <Gauge className="h-3 w-3" /> {formatMileage(vehicle.mileage)}
-          </span>
-          <span className="font-ui flex items-center gap-1 rounded-md bg-zinc-50 px-2 py-1 text-[11px] text-zinc-500">
-            <Fuel className="h-3 w-3" /> {vehicle.fuelType}
-          </span>
-          <span className="font-ui rounded-md bg-zinc-50 px-2 py-1 text-[11px] text-zinc-500">
-            {vehicle.transmission}
-          </span>
-        </div>
-
-        <div className="mt-3 flex items-end justify-between">
-          <div>
-            <p className="font-ui text-[11px] text-zinc-400">FOB price</p>
-            <p className="font-display tabular-nums text-base font-semibold text-zinc-900">
-              {formatPrice(vehicle.price)}
-            </p>
-          </div>
-          <button className="font-ui rounded-lg bg-black px-3.5 py-2 text-xs font-semibold text-white">
-            {vehicle.status === "live" ? "Place bid" : "View"}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
@@ -644,14 +287,12 @@ function SearchSortRow({
         }
       >
         <ArrowUpDown
-          className={`h-4 w-4 ${sortDir === "asc" ? "text-orange-600" : "text-zinc-600"}`}
+          className={`h-4 w-4 ${sortDir === "asc" ? "text-[#02ab86]" : "text-zinc-600"}`}
         />
       </button>
     </div>
   );
 }
-
-/* ---------- Root ---------- */
 
 const PAGE_SIZE = 6;
 
