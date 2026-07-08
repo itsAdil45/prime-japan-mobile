@@ -8,7 +8,7 @@ export function useStatusBar() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return; // skip on web/dev
 
-    StatusBar.setBackgroundColor({ color: "#09090b" });
-    StatusBar.setStyle({ style: Style.Dark });
+    StatusBar.setBackgroundColor({ color: "#ffffff" });
+    StatusBar.setStyle({ style: "black" });
   }, []);
 }
