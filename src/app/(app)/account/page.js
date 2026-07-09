@@ -1,7 +1,7 @@
 // app/(app)/account/page.jsx
 "use client";
 import { useRouter } from "next/navigation";
-import AccountHome from "@/components/account/AccountHome";
+import AccountHome from "@/components/Account/AccountHome";
 
 const ROUTES = {
   bids: "/bids",
