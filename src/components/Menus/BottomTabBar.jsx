@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, Heart, Package, User } from "lucide-react";
+import { Home, Search, MessageCircle, Package, User } from "lucide-react";
 
 const TABS = [
   { key: "home", label: "Home", href: "/home", icon: Home },
   { key: "search", label: "Search", href: "/search", icon: Search },
-  { key: "watchlist", label: "Watchlist", href: "/watchlist", icon: Heart },
+  { key: "watchlist", label: "Chat", href: "/chat", icon: MessageCircle },
   { key: "orders", label: "Orders", href: "/orders", icon: Package },
   { key: "account", label: "Account", href: "/account", icon: User },
 ];

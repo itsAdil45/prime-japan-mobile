@@ -206,7 +206,8 @@ export default function HomeScreen() {
     <div className="relative flex min-h-screen flex-col bg-zinc-50 font-sans">
       <FontImports />
 
-      <div className="mx-auto w-full max-w-sm pb-24">
+      <div className="mx-auto w-full  pb-24">
+        {/* max-w-sm */}
         <TopBar />
         <SearchBar />
         <CategoryRow active={category} onChange={setCategory} />
