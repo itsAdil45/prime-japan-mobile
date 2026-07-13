@@ -1,19 +1,21 @@
+// components/BottomTabBar.jsx
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, MessageCircle, Package, User } from "lucide-react";
+import { Home, Search, MessageCircle, User } from "lucide-react";
+import { useOffline } from "./OfflineProvider";
 
 const TABS = [
   { key: "home", label: "Home", href: "/home", icon: Home },
   { key: "search", label: "Search", href: "/search", icon: Search },
   { key: "watchlist", label: "Chat", href: "/chat", icon: MessageCircle },
-  { key: "orders", label: "Orders", href: "/orders", icon: Package },
   { key: "account", label: "Account", href: "/account", icon: User },
 ];
 
 export default function BottomTabBar() {
   const pathname = usePathname();
+  const isOffline = useOffline();
 
   return (
     <nav
@@ -26,7 +28,13 @@ export default function BottomTabBar() {
           <Link
             key={key}
             href={href}
-            replace
+            replace={!isOffline}
+            onClick={(e) => {
+              if (isOffline) {
+                e.preventDefault();
+                window.location.href = href; // hard nav -> SW navigate handler -> cache
+              }
+            }}
             className="flex flex-1 flex-col items-center gap-1 py-2.5"
           >
             <span className="relative">
@@ -39,11 +47,7 @@ export default function BottomTabBar() {
               )}
             </span>
             <span
-              className={`text-[10px] ${
-                isActive
-                  ? "font-semibold text-[#02ab86]"
-                  : "font-medium text-zinc-400"
-              }`}
+              className={`text-[10px] ${isActive ? "font-semibold text-[#02ab86]" : "font-medium text-zinc-400"}`}
             >
               {label}
             </span>
