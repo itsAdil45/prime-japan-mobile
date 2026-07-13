@@ -1,4 +1,3 @@
-// components/OfflineProvider.jsx
 "use client";
 import {
   createContext,
@@ -16,6 +15,7 @@ const PING_TIMEOUT = 4000;
 
 export default function OfflineProvider({ children }) {
   const [isOffline, setIsOffline] = useState(false);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
   const networkRef = useRef(null);
 
   const checkViaFetch = useCallback(async () => {
@@ -40,8 +40,6 @@ export default function OfflineProvider({ children }) {
     if (!Network) return checkViaFetch();
     try {
       const status = await Network.getStatus();
-      // "connected" on the OS level doesn't guarantee real internet
-      // (e.g. wifi with no route out), so confirm with an actual fetch.
       if (!status.connected) {
         setIsOffline(true);
         return false;
@@ -70,9 +68,11 @@ export default function OfflineProvider({ children }) {
           removeListener = () => listener.remove();
         }
       } catch {
-        // running in a plain browser, no Capacitor bridge — fetch fallback covers it
+        // plain browser, no Capacitor bridge
       }
-      checkConnectivity();
+
+      await checkConnectivity();
+      setInitialCheckDone(true); // triggers splash hide below, exactly once
     })();
 
     const onOnline = () => checkConnectivity();
@@ -88,6 +88,21 @@ export default function OfflineProvider({ children }) {
       removeListener?.();
     };
   }, [checkConnectivity]);
+
+  // Hide native splash once we know the connectivity state — runs once.
+  useEffect(() => {
+    if (!initialCheckDone) return;
+    (async () => {
+      try {
+        const { Capacitor } = await import("@capacitor/core");
+        if (!Capacitor.isNativePlatform()) return;
+        const { SplashScreen } = await import("@capacitor/splash-screen");
+        await SplashScreen.hide();
+      } catch {
+        // no-op on web or if plugin missing
+      }
+    })();
+  }, [initialCheckDone]);
 
   return (
     <OfflineContext.Provider value={isOffline}>

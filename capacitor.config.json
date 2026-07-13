@@ -9,6 +9,13 @@
   "plugins": {
     "StatusBar": {
       "overlaysWebView": false
+    },
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#ffffff",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
     }
   }
 }
