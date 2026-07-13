@@ -1,6 +1,6 @@
 "use client";
 import BottomTabBar from "@/components/Menus/BottomTabBar";
-import BackToHomeGuard from "@/components/BackToHomeGuard";
+// import BackToHomeGuard from "@/components/BackToHomeGuard";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { useStatusBar } from "@/hook/useStatusBar";
 export default function AppLayout({ children }) {
@@ -8,7 +8,7 @@ export default function AppLayout({ children }) {
 
   return (
     <div className="relative min-h-screen bg-zinc-50">
-      <BackToHomeGuard />
+      {/* <BackToHomeGuard /> */}
       <div className="pb-20">{children}</div>
       <ServiceWorkerRegister />
       <BottomTabBar />
