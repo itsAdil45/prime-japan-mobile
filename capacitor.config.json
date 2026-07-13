@@ -1,9 +1,9 @@
 {
   "appId": "jp.primejapan.app",
   "appName": "Prime Japan",
-  "webDir": "native-shell",
+  "webDir": "public",
   "server": {
-    "allowNavigation": ["prime-japan-mobile.vercel.app"],
+    "url": "https://prime-japan-mobile.vercel.app",
     "cleartext": false
   },
   "plugins": {
