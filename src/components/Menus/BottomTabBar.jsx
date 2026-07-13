@@ -4,8 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Search, MessageCircle, User } from "lucide-react";
-import { useOffline } from "./OfflineProvider";
-
+import { useOffline } from "../OfflineProvider";
 const TABS = [
   { key: "home", label: "Home", href: "/home", icon: Home },
   { key: "search", label: "Search", href: "/search", icon: Search },
