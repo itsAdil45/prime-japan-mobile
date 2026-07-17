@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import OfflineProvider from "@/components/OfflineProvider";
+// import OfflineProvider from "@/components/OfflineProvider";
+// import { SessionProvider } from "next-auth/react";
+import Providers from "@/components/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,8 +26,9 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {" "}
-        <OfflineProvider>{children}</OfflineProvider>
+        <Providers>{children}</Providers> {/* <SessionProvider> */}
+        {/* <OfflineProvider>{children}</OfflineProvider> */}
+        {/* </SessionProvider> */}
       </body>
     </html>
   );
