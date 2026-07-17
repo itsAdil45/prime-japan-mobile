@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import useAxiosAuth from "./useAxiosAuth";
 import { signOut } from "next-auth/react";
-import { logout } from "@/components/Logout";
+// import { logout } from "@/components/Logout";
 
 /* ------------------------------------------------------------------ */
 /*  In-memory cache, keyed by URL. Lives at module scope, so it        */
@@ -67,7 +67,7 @@ export default function useGet(url, immediate = true, requireAuth = true) {
     } catch (err) {
       const status = err?.response?.status;
       if (status === 401) {
-        logout();
+        // logout();
         signOut({ callbackUrl: "/auth/login" });
       }
       if (!mountedRef.current) return;
