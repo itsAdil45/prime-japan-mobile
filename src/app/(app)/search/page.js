@@ -1040,10 +1040,10 @@ export default function ShopScreen({ initialMake = "", initialModel = "" }) {
     const href = `/${vehicle.type}/${
       vehicle.type === "auction" ? vehicle.id : vehicle.slug
     }`;
-    if (!isLoggedIn) {
-      router.push(`/login?redirect=${encodeURIComponent(href)}`);
-      return;
-    }
+    // if (!isLoggedIn) {
+    //   router.push(`/login?redirect=${encodeURIComponent(href)}`);
+    //   return;
+    // }
     router.push(href);
   };
 
