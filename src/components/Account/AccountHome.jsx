@@ -9,7 +9,9 @@ import {
   KeyRound,
   LogOut,
 } from "lucide-react";
-
+import { logout } from "../Logout";
+import { useSession } from "next-auth/react";
+import { themeColors } from "@/theme/themeColors";
 /* ------------------------------------------------------------------ */
 /*  Maps DashboardContent's stat cards into a mobile hub screen that   */
 /*  links out to each sub-screen, rather than showing every table      */
@@ -57,12 +59,12 @@ function ProfileHeader({ user }) {
       </div>
       <span
         className={`font-ui shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ${
-          user.accountType === "company"
+          user.emailVerified === true
             ? "bg-blue-50 text-blue-600"
             : "bg-emerald-50 text-emerald-600"
         }`}
       >
-        {user.accountType}
+        {user.emailVerified === true && <span>Varified</span>}
       </span>
     </div>
   );
@@ -154,7 +156,9 @@ function NavRow({ icon: Icon, label, sublabel, onClick, danger }) {
       className="font-ui flex w-full items-center gap-3 border-b border-zinc-100 px-5 py-4 text-left last:border-b-0"
     >
       <span
-        className={`flex h-9 w-9 items-center justify-center rounded-full ${danger ? "bg-red-50" : "bg-zinc-100"}`}
+        className={`flex h-9 w-9 items-center justify-center rounded-full ${
+          danger ? "bg-red-50" : "bg-zinc-100"
+        }`}
       >
         <Icon
           className={`h-4 w-4 ${danger ? "text-red-600" : "text-zinc-600"}`}
@@ -162,7 +166,9 @@ function NavRow({ icon: Icon, label, sublabel, onClick, danger }) {
       </span>
       <span className="flex-1">
         <p
-          className={`text-sm font-medium ${danger ? "text-red-600" : "text-zinc-900"}`}
+          className={`text-sm font-medium ${
+            danger ? "text-red-600" : "text-zinc-900"
+          }`}
         >
           {label}
         </p>
@@ -174,11 +180,18 @@ function NavRow({ icon: Icon, label, sublabel, onClick, danger }) {
 }
 
 export default function AccountHome({ onNavigate = () => {} }) {
+  const { data: session } = useSession();
+  const user_Data = {
+    name: session?.user?.name || "Guest User",
+    customerId: session?.user?.customer_id || "",
+    emailVerified: session?.user?.email_verified || "",
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 pb-24 font-sans">
       <StyleBlock />
 
-      <ProfileHeader user={MOCK_USER} />
+      <ProfileHeader user={user_Data} />
       <CreditsCard credits={MOCK_STATS.credits} />
       <OverviewRow stats={MOCK_STATS} onNavigate={onNavigate} />
 
@@ -214,14 +227,26 @@ export default function AccountHome({ onNavigate = () => {} }) {
         />
       </div>
 
-      <div className="mx-5 mt-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-        <NavRow
-          icon={LogOut}
-          label="Log out"
-          onClick={() => onNavigate("logout")}
-          danger
-        />
-      </div>
+      {session?.user ? (
+        <div className="mx-5 mt-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+          <NavRow
+            icon={LogOut}
+            label="Log out"
+            onClick={() => logout()}
+            danger
+          />
+        </div>
+      ) : (
+        <div className="mt-10 ms-5">
+          <a
+            href="/login"
+            className="text-white p-3 px-8 rounded-md"
+            style={{ background: themeColors.primary }}
+          >
+            Login / Sign Up
+          </a>
+        </div>
+      )}
     </div>
   );
 }

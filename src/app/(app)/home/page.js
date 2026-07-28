@@ -13,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import useGet from "@/customHooks/useGet";
-
 /* ------------------------------------------------------------------ */
 /*  Maps the web home page's sections onto mobile:                     */
 /*                                                                      */
@@ -51,12 +50,17 @@ const FontImports = () => (
 
 /* ---------- Untouched: TopBar / SearchBar / CategoryRow ---------- */
 
-function TopBar() {
+function TopBar({ userName }) {
   return (
     <div className="flex items-center justify-between px-5 pt-6">
       <div>
         <p className="font-ui text-xs text-zinc-400">Good afternoon</p>
-        <p className="font-display text-lg font-semibold text-zinc-900">Adil</p>
+        <p className="font-display text-lg font-semibold text-zinc-900">
+          {" "}
+          <i className="bi bi-person-circle me-2" />
+          {userName || "Guest User"}
+          <span style={{ top: "40.5px", left: "84.2344px" }} />
+        </p>
       </div>
       <button className="relative rounded-full bg-zinc-100 p-2.5">
         <Bell className="h-4.5 w-4.5 text-zinc-600" />
@@ -323,7 +327,7 @@ export default function HomeScreen() {
   const [category, setCategory] = useState("All");
   const [pendingVehicle, setPendingVehicle] = useState(null);
   const router = useRouter();
-  const { status: sessionStatus } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
 
   const { data, loading, error, refetch } = useGet("/home", true, false);
   const homeData = data?.data ?? null;
@@ -356,7 +360,7 @@ export default function HomeScreen() {
     <div className="relative flex min-h-screen flex-col bg-zinc-50 font-sans pb-24">
       <FontImports />
 
-      <TopBar />
+      <TopBar userName={session?.user?.name} />
       <SearchBar />
       <CategoryRow active={category} onChange={setCategory} />
 

@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import {
+  Mail,
+  Lock,
+  User,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 
 const FontImports = () => (
   <style>{`
@@ -100,16 +110,22 @@ function PasswordField({ label = "Password", ...props }) {
 
 /* ---------- Buttons ---------- */
 
-function PrimaryButton({ children, ...props }) {
+function PrimaryButton({ children, loading, ...props }) {
   return (
-    <a
-      href="/home"
-      className="font-ui flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3.5 text-sm font-semibold text-white transition active:scale-[0.98]"
+    <button
+      className="font-ui flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3.5 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-60"
+      disabled={loading}
       {...props}
     >
-      {children}
-      <ArrowRight className="h-4 w-4" />
-    </a>
+      {loading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <>
+          {children}
+          <ArrowRight className="h-4 w-4" />
+        </>
+      )}
+    </button>
   );
 }
 
@@ -154,17 +170,76 @@ function Divider() {
 /* ---------- Forms ---------- */
 
 function LoginForm() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Please enter your email and password.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        remember_me: String(rememberMe),
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Invalid email or password.");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/home");
+      router.refresh();
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  }
+
   return (
-    <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <Field
         icon={Mail}
         label="Email"
         type="email"
         placeholder="you@example.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        autoComplete="email"
+        required
       />
       <div>
-        <PasswordField placeholder="••••••••" />
-        <div className="mt-2 flex justify-end">
+        <PasswordField
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+          required
+        />
+        <div className="mt-2 flex items-center justify-between">
+          <label className="font-ui flex items-center gap-2 text-xs text-slate-500">
+            <input
+              type="checkbox"
+              className="h-3.5 w-3.5 rounded border-slate-300"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            Remember me
+          </label>
           <button
             type="button"
             className="font-ui text-xs font-medium text-slate-500 underline underline-offset-2"
@@ -173,7 +248,16 @@ function LoginForm() {
           </button>
         </div>
       </div>
-      <PrimaryButton type="submit">Log in</PrimaryButton>
+
+      {error && (
+        <p className="font-ui text-xs text-red-500" role="alert">
+          {error}
+        </p>
+      )}
+
+      <PrimaryButton type="submit" loading={loading}>
+        Log in
+      </PrimaryButton>
     </form>
   );
 }
