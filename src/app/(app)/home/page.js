@@ -13,6 +13,8 @@ import {
   X,
 } from "lucide-react";
 import useGet from "@/customHooks/useGet";
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatPrice } from "@/utils/formatPrice";
 /* ------------------------------------------------------------------ */
 /*  Maps the web home page's sections onto mobile:                     */
 /*                                                                      */
@@ -241,21 +243,10 @@ function BrandsRowSkeleton() {
   );
 }
 
-/* ---------- Latest auctions (from Home2PopularAuction) ---------- */
-
-function formatPrice(vehicle) {
-  // ASSUMPTION — see file header note. Confirm real field names.
-  if (vehicle.price_jpy)
-    return `¥${Number(vehicle.price_jpy).toLocaleString()}`;
-  if (vehicle.price_usd)
-    return `$${Number(vehicle.price_usd).toLocaleString()}`;
-  return "Price on request";
-}
-
-/* ---------- Grid variant (matches the old static VehicleCardGrid layout) ---------- */
-
 function AuctionGridCard({ vehicle, onOpen }) {
   const isLive = vehicle.status !== "sold";
+  const { currency } = useCurrency();
+
   return (
     <div
       role="button"
@@ -301,7 +292,7 @@ function AuctionGridCard({ vehicle, onOpen }) {
           Lot # {vehicle.lot_number}
         </p>
         <p className="font-display tabular-nums mt-1 text-sm font-semibold text-zinc-900">
-          {formatPrice(vehicle)}
+          {formatPrice(vehicle, currency)}
         </p>
       </div>
     </div>

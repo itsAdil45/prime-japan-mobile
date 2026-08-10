@@ -16,7 +16,8 @@ import {
   Car,
 } from "lucide-react";
 import useGet from "@/customHooks/useGet";
-
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatPrice } from "@/utils/formatPrice";
 /* ------------------------------------------------------------------ */
 /*  Wired to the real endpoints from CarsShopComponent / AuctionSidebar-*/
 /*  Filters / AuctionGrid:                                              */
@@ -156,16 +157,6 @@ function formatChipValue(key, value) {
     return formatEngine(Number(value));
   return String(value);
 }
-
-function formatPrice(vehicle) {
-  if (vehicle.avg_price_usd)
-    return `$${Number(vehicle.avg_price_usd).toLocaleString()} FOB`;
-  if (vehicle.avg_price_jpy)
-    return `¥${Number(vehicle.avg_price_jpy).toLocaleString()} FOB`;
-  return "Price on request";
-}
-
-/* ---------- Bottom sheet shell ---------- */
 
 function BottomSheet({ open, onClose, title, children, footer }) {
   if (!open) return null;
@@ -714,6 +705,7 @@ function VehicleCard({ vehicle, onOpen }) {
     .join(" ");
   const isLive = vehicle.status === "live";
   const [saved, setSaved] = useState(false);
+  const { currency } = useCurrency();
 
   return (
     <div
@@ -791,7 +783,7 @@ function VehicleCard({ vehicle, onOpen }) {
           <div>
             <p className="font-ui text-[11px] text-zinc-400">Car price</p>
             <p className="font-display tabular-nums text-base font-semibold text-zinc-900">
-              {formatPrice(vehicle)}
+              {formatPrice(vehicle, currency)}{" "}
             </p>
           </div>
           <span className="font-ui rounded-lg bg-orange-600 px-3.5 py-2 text-xs font-semibold text-white">

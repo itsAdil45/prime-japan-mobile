@@ -12,12 +12,7 @@ import {
 import { logout } from "../Logout";
 import { useSession } from "next-auth/react";
 import { themeColors } from "@/theme/themeColors";
-/* ------------------------------------------------------------------ */
-/*  Maps DashboardContent's stat cards into a mobile hub screen that   */
-/*  links out to each sub-screen, rather than showing every table      */
-/*  inline. Bids/Invoices tables become their own screens; Addresses,  */
-/*  Settings, and Change Password each get their own file too.         */
-/* ------------------------------------------------------------------ */
+import { useCurrency } from "@/context/CurrencyContext";
 
 const StyleBlock = () => (
   <style>{`
@@ -71,7 +66,12 @@ function ProfileHeader({ user }) {
 }
 
 function CreditsCard({ credits }) {
-  const [currency, setCurrency] = useState("usd");
+  const { currency, setCurrency } = useCurrency();
+  const handleCurrencySelect = (c) => {
+    setCurrency(c);
+    // setCurrencyOpen(false);
+  };
+  // const [currency, setCurrency] = useState("usd");
   return (
     <div className="mx-5 mt-5 rounded-2xl bg-zinc-900 px-4 py-4">
       <div className="flex items-center justify-between">
@@ -80,7 +80,7 @@ function CreditsCard({ credits }) {
           {["usd", "jpy"].map((c) => (
             <button
               key={c}
-              onClick={() => setCurrency(c)}
+              onClick={() => handleCurrencySelect(c)}
               className={`px-2.5 py-1 uppercase ${
                 currency === c ? "bg-orange-600 text-white" : "text-zinc-300"
               }`}
