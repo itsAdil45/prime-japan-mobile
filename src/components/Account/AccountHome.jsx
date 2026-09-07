@@ -13,6 +13,7 @@ import { logout } from "../Logout";
 import { useSession } from "next-auth/react";
 import { themeColors } from "@/theme/themeColors";
 import { useCurrency } from "@/context/CurrencyContext";
+import useGet from "@/customHooks/useGet";
 
 const StyleBlock = () => (
   <style>{`
@@ -29,11 +30,35 @@ const MOCK_USER = {
   emailVerified: true,
 };
 
-const MOCK_STATS = {
-  credits: { usd: 1250, jpy: 187000 },
-  bids: { pending: 3, won: 5, lost: 1 },
-  invoices: { pending: 2, overdue: 1 },
+// Fallback shown before the /bid-requests response lands (or if it errors) —
+// keeps CreditsCard/OverviewRow from crashing on undefined fields.
+const EMPTY_STATS = {
+  credits: { usd: 0, jpy: 0 },
+  bids: { pending: 0, won: 0, lost: 0 },
+  invoices: { pending: 0, overdue: 0 },
 };
+
+// Maps the /bid-requests response's `stats` object (bids, invoices, credit)
+// to the shape CreditsCard/OverviewRow expect. Only `stats` is used here —
+// the `bids` list in the response is for the Bids screen, not this page.
+function mapBidRequestStats(stats) {
+  if (!stats) return EMPTY_STATS;
+  return {
+    credits: {
+      usd: stats.credit?.amount_usd ?? 0,
+      jpy: stats.credit?.amount_jpy ?? 0,
+    },
+    bids: {
+      pending: stats.bids?.pending ?? 0,
+      won: stats.bids?.won ?? 0,
+      lost: stats.bids?.lost ?? 0,
+    },
+    invoices: {
+      pending: stats.invoices?.pending ?? 0,
+      overdue: stats.invoices?.overdue ?? 0,
+    },
+  };
+}
 
 function ProfileHeader({ user }) {
   const initials = user.name
@@ -92,8 +117,10 @@ function CreditsCard({ credits }) {
       </div>
       <p className="font-display tabular-nums mt-1.5 text-2xl font-semibold text-white">
         {currency === "usd"
-          ? `$${credits.usd.toLocaleString()}`
-          : `¥${credits.jpy.toLocaleString()}`}
+          ? `$${Number(credits.usd ?? 0).toLocaleString(undefined, {
+              maximumFractionDigits: 2,
+            })}`
+          : `¥${Number(credits.jpy ?? 0).toLocaleString()}`}
       </p>
     </div>
   );
@@ -187,13 +214,21 @@ export default function AccountHome({ onNavigate = () => {} }) {
     emailVerified: session?.user?.email_verified || "",
   };
 
+  // Overview + Available credits are both driven by the `stats` object from
+  // /bid-requests. The `bids` list in that response isn't used here — it
+  // belongs to the Bids screen.
+  const { data, loading: statsLoading } = useGet("/bid-requests", true, true);
+  const stats = statsLoading
+    ? EMPTY_STATS
+    : mapBidRequestStats(data?.data?.stats);
+
   return (
     <div className="min-h-screen bg-zinc-50 pb-24 font-sans">
       <StyleBlock />
 
       <ProfileHeader user={user_Data} />
-      <CreditsCard credits={MOCK_STATS.credits} />
-      <OverviewRow stats={MOCK_STATS} onNavigate={onNavigate} />
+      <CreditsCard credits={stats.credits} />
+      <OverviewRow stats={stats} onNavigate={onNavigate} />
 
       <div className="mx-5 mt-6 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
         <NavRow
